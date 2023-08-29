@@ -3,7 +3,6 @@ MY_SOURCES	=	main.cpp	\
 				Player.cpp
 
 
-
 ifeq ($(OS),Windows_NT)
 	MY_SOURCES	:=	$(addprefix src\,$(MY_SOURCES))
 else
@@ -27,8 +26,8 @@ endif
 
 NAME		=	learn-for-me
 ifeq ($(OS),Windows_NT)
-	NAME		:=	$(NAME).exe
 	PATH_BIN	=	bin\$(NAME)
+	NAME		:=	$(NAME).exe
 else
 	PATH_BIN	=	bin/$(NAME)
 endif
@@ -48,7 +47,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@clear
 	@echo "Password required to move the SFML libraries to /usr/lib/"
-	@sudo cp SFML/lib_linux/libsfml-*.so.3.0 /usr/lib/
+	#@sudo cp SFML/lib_linux/libsfml-*.so.3.0 /usr/lib/
 	@clear
 	@g++ $(MY_OBJECTS) -o $(NAME) -LSFML/lib_linux -lsfml-graphics -lsfml-window -lsfml-system
 	@mkdir -p bin

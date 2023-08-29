@@ -1,6 +1,25 @@
 #include "learn-for-me.h"
 
 
+/*void removeBlackBackground(sf::Texture& texture)
+{
+    sf::Image image = texture.copyToImage();
+    for (unsigned int x = 0; x < image.getSize().x; ++x)
+    {
+        for (unsigned int y = 0; y < image.getSize().y; ++y)
+        {
+            sf::Color pixel = image.getPixel({x, y});
+            if (pixel == sf::Color::Black)
+            {
+                pixel.a = 0;
+                image.setPixel({x, y}, pixel);
+            }
+        }
+    }
+    texture.update(image);
+}*/
+
+
 int main()
 {
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
@@ -17,7 +36,46 @@ int main()
     std::cout << "cellOffsetX: " << cellOffsetX << std::endl;
     std::cout << "cellOffsetY: " << cellOffsetY << std::endl;
 
-    Player player(std::min(cellSizeX, cellSizeY));
+
+	sf::Texture playerTexture;
+	if (playerTexture.loadFromFile("res/player.png") == false) {
+		std::cout << "Error loading player.png" << std::endl;
+		return 1;
+	}
+
+	sf::Texture studentTexture;
+	if (studentTexture.loadFromFile("res/student.png") == false) {
+		std::cout << "Error loading student.png" << std::endl;
+		return 1;
+	}
+
+	sf::Texture teacherTexture;
+	if (teacherTexture.loadFromFile("res/teacher.png") == false) {
+		std::cout << "Error loading teacher.png" << std::endl;
+		return 1;
+	}
+
+
+
+    Player player(std::min(cellSizeX, cellSizeY), playerTexture);
+
+	std::vector<Student> students;
+	students.push_back(Student(10, 10, std::min(cellSizeX, cellSizeY), cellSizeX, cellSizeY, studentTexture));
+	students.push_back(Student(5, 5, std::min(cellSizeX, cellSizeY), cellSizeX, cellSizeY, studentTexture));
+
+	std::vector<Desk> desks;
+	desks.push_back(Desk(10, 10, std::min(cellSizeX, cellSizeY), cellSizeX, cellSizeY));
+	desks.push_back(Desk(5, 5, std::min(cellSizeX, cellSizeY), cellSizeX, cellSizeY));
+	desks[0].setStudent(&students[0]);
+	desks[1].setStudent(&students[1]);
+
+	Teacher teacher(7, 10, std::min(cellSizeX, cellSizeY), cellSizeX, cellSizeY, teacherTexture);
+
+
+
+	sf::Clock	clock;
+	float		dt;
+
 
     while (window.isOpen())
     {
@@ -31,7 +89,9 @@ int main()
                 window.close();
         }
 
-        player.update(size, cellSizeX, cellSizeY, cellOffsetX, cellOffsetY);
+		dt = clock.restart().asSeconds();
+
+        player.update(size, dt, students, desks);
 
         window.clear();
 
@@ -49,6 +109,12 @@ int main()
         }
 
         player.draw(window);
+
+		for (auto& desk : desks) {
+			desk.draw(window);
+		}
+
+		teacher.draw(window);
 
         window.display();
     }

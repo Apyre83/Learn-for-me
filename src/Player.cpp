@@ -1,39 +1,70 @@
 #include "learn-for-me.h"
 
-void    Player::update(sf::Vector2u mapSize, int cellSizeX, int cellSizeY, int cellOffsetX, int cellOffsetY) {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && x > speed) {
-        x -= speed;
+
+bool checkOverlap(const sf::Rect<float>& playerRect, const std::vector<sf::Rect<float>>& objectRects) {
+    for (const auto& objectRect : objectRects) {
+        if (playerRect.findIntersection(objectRect)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void Player::update(sf::Vector2u mapSize, float dt, std::vector<Student> &students, std::vector<Desk> &desks) {
+	(void) mapSize;
+    float newX = x, newY = y;
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        newX -= speed * dt * TIME_FACTOR;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        newX += speed * dt * TIME_FACTOR;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        newY -= speed * dt * TIME_FACTOR;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        newY += speed * dt * TIME_FACTOR;
+    }
+
+    std::vector<sf::Rect<float>> studentRects, deskRects;
+    for (const auto& student : students) {
+        studentRects.push_back({{student.getX() * 1.0f, student.getY() * 1.0f}, {student.getSize() * 1.0f, student.getSize() * 1.0f}});
+    }
+    for (const auto& desk : desks) {
+        deskRects.push_back({{desk.getX() * 1.0f, desk.getY() * 1.0f}, {desk.getSize() * 1.0f, desk.getSize() * 1.0f}});
+    }
+
+    sf::Rect<float> playerRect({newX, newY}, {size * 1.0f, size * 1.0f});
+    
+    bool overlap = checkOverlap(playerRect, studentRects) || checkOverlap(playerRect, deskRects);
+
+    if (!overlap) {
+        x = newX;
+        y = newY;
         isMoving = true;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && x < mapSize.x - speed - size) {
-        x += speed;
-        isMoving = true;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && y > speed) {
-        y -= speed;
-        isMoving = true;
+    } else {
+        // Si collision, vérifiez séparément pour les mouvements en X et Y
+        playerRect.left = newX;
+        playerRect.top = y;
 
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && y < mapSize.y - speed - size) {
-        y += speed;
-        isMoving = true;
-    }
+        overlap = checkOverlap(playerRect, studentRects) || checkOverlap(playerRect, deskRects);
 
-    if (!isMoving) /* Go to the closest cell */
-    {
-        int xCell = std::round(static_cast<float>(x) / cellSizeX);
-        int yCell = std::round(static_cast<float>(y) / cellSizeY);
+        if (!overlap) {
+            x = newX;
+            isMoving = true;
+        }
 
-        xCell = std::max(0, std::min(static_cast<int>(mapSize.x / cellSizeX) - 1, xCell));
-        yCell = std::max(0, std::min(static_cast<int>(mapSize.y / cellSizeY) - 1, yCell));
+        playerRect.left = x;
+        playerRect.top = newY;
 
-        x = xCell * cellSizeX + cellOffsetX * 1.0f + cellSizeX / 2 - size / 2;
-        y = yCell * cellSizeY + cellOffsetY * 1.0f + cellSizeY / 2 - size / 2;
+        overlap = checkOverlap(playerRect, studentRects) || checkOverlap(playerRect, deskRects);
 
-        std::cout << "xCell: " << xCell << " " << "yCell: " << yCell << std::endl;
-    }
-    else
-    {
-        isMoving = false;
+        if (!overlap) {
+            y = newY;
+            isMoving = true;
+        }
     }
 }
+

@@ -5,9 +5,9 @@
 
 class Player {
 public:
-    Player(const int size_ = 10) : size(size_) {
+    Player(const int size_, sf::Texture &texture) : size(size_) {
         shape.setSize(sf::Vector2f(size, size));
-        shape.setFillColor(sf::Color(255, 128, 0, 255));
+		shape.setTexture(&texture);
     }
     ~Player() = default;
 
@@ -17,12 +17,12 @@ public:
         shape.setPosition({x, y});
         window.draw(shape);
     }
-    void update(sf::Vector2u mapSize, int cellSizeX, int cellSizeY, int cellOffsetX, int cellOffsetY);
+    void update(sf::Vector2u mapSize, float dt, std::vector<Student> &students, std::vector<Desk> &desks);
 
 private:
     float               x = 0;
     float               y = 0;
-    float               speed = 0.5f;
+    float               speed = 10.0f;
     unsigned int        size;
 
     bool                isMoving = false;
