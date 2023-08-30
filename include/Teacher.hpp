@@ -20,7 +20,7 @@ public:
 		shape.setPosition({x, y});
 		window.draw(shape);
 	}
-	
+
 private:
 	float               x = 0;
 	float               y = 0;
